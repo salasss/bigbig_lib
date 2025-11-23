@@ -136,13 +136,27 @@ bigbig add_soustration_bigbig(bigbig a,bigbig b,bigbig *c){
 
 
 }
+void redimentionner(bigbig *D,int S_taille){
+    if (D->k == S_taille)return;
+    unsigned short *temp = realloc(D->bloc,S_taille * sizeof(unsigned short));
+    assert(*temp != NULL);
+    if (D->k < S_taille){
+        for(int i=D->k; i>S_taille;i++){
+            D->bloc[i]=0;
+        }
+    }
 
-// void copier(bigbig *D,bigbig *S){
-//     int i;
-//     if(D->k <S->k) redimentionner(D,S->k);
-//     for (i =0;i<S->k;i++)D->bloc[i] = S->bloc[i];
-//     for (i = S->k;i<D->k;i++)D->bloc[i] = S->bloc[i];
-// }
+}
+
+void copier(bigbig *D,bigbig *S){
+    int i;
+    if(D->k <S->k) redimentionner(D,S->k);
+    D->k = S->k;
+    D->signe = S->signe;
+    for (int i = 0; i < S->k; i++) {
+        D->bloc[i] = S->bloc[i];
+    }
+}
 
 
 //on attarque la qst4 : la multiplication
@@ -241,6 +255,33 @@ void test_unit(){
     assert(cx.signe==0);
     printf("soustraction qui donne 0 : OK \n");
 
+    // Exemple2 : +2002 * 2002 
+    bigbig axx, bxx, cxx;
+    
+    // Cas : 2002 * 0
+    axx = create_bigbig(1, 16);
+    axx.bloc[0] = 0x07D2;      
+    
+    bxx = create_bigbig(1, 16); // 
+    bxx.bloc[0] = 0x07D2;       
+    
+    multiplication(axx, bxx, &cxx);
+
+    // Vérifications
+    assert(cxx.bloc[0] == 0x2844); // Le résultat doit être 0
+    assert(cxx.bloc[1] == 0x003D);
+    assert(cxx.k == 2);            // Taille 1
+    
+    printf("Multiplication 2002*2002 : OK \n");
+
+    bigbig aauc;
+    aauc = create_bigbig(1,16);
+    aauc.bloc[0]=0x0011;
+    multiplication(aauc, aauc, &aauc);
+    assert(cxx.bloc[0] == 0x0121);
+    assert(cxx.k == 1);
+    printf("Multiplication au carre : OK \n");
+    
 }
 
 int main() {
