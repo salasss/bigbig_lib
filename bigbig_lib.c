@@ -34,7 +34,11 @@ int meme_signature(int a,int b){
     return (a!=b) ? 0 : 1;
 }
 
-
+void nettoyer_zero(bigbig *c){
+    while(c->k > 1 && c->bloc[c->k-1]==0){
+        c->k--;
+    };
+}
 //qst3) une fonction qui effecture l'addition de 2 nombre de cette representation et qui le dans dans un 3 eme parametre
 bigbig addtion_bigbig(bigbig a,bigbig b,bigbig *c){
     // on trouve la taille du nv element 
@@ -143,9 +147,9 @@ bigbig add_soustration_bigbig(bigbig a,bigbig b,bigbig *c){
 
 //on attarque la qst4 : la multiplication
 bigbig multiplication(bigbig a,bigbig b,bigbig *c){
-    int somme;
-    c->k = calloc(c->k,sizeof(unsigned short));
-    c->k = a.k+b.k;
+    c->k = a.k+b.k; 
+    c->bloc = calloc(c->k,sizeof(unsigned short));
+    c->signe = (a.signe == b.signe) ? 1 : 0;
     assert (c->bloc != NULL);
     
     for (int i=0;i<a.k;i++){
@@ -160,13 +164,17 @@ bigbig multiplication(bigbig a,bigbig b,bigbig *c){
 
      //la il faut que rajojute la retenu restant 
      int idx  =i + b.k;
-     while(carry =!0 && idx < c->k){
+     while(carry !=0 && idx < c->k){
          unsigned int temp = (unsigned int)c->bloc[idx] + carry;
         c->bloc[idx] = (unsigned short)(temp & 0xFFFF);
         carry = temp >> 16;
         idx++;
      }
     }
+
+    //if faut mainnte verifier si le derinier bloc est vide ou pas sinon ou lenleve
+    
+    nettoyer_zero(c);
 
     return *c;
 
