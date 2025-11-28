@@ -47,7 +47,7 @@ void nettoyer_zero(bigbig *c)
     //2nd version pour bien fiare les chose faut reallouer ce qu'on a besoin sans prendre des cases e nplus pour rien
     unsigned short *tmp = realloc(c->bloc,c->k * sizeof(unsigned short));
     if (tmp != NULL) {
-        c->bloc = tmp
+        c->bloc = tmp;
     } 
 }
 // qst3) une fonction qui effecture l'addition de 2 nombre de cette representation et qui le dans dans un 3 eme parametre
