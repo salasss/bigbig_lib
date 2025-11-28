@@ -226,15 +226,14 @@ bigbig multiplication(bigbig a, bigbig b, bigbig *c)
 
 void test_unit()
 {
-    // Exemple1 : 65535 + 1 (0xFFFF + 0x0001)
     bigbig a, b, c;
-    a.k = 1;
-    a.signe = 1;
-    a.bloc = malloc(sizeof(unsigned short));
-    a.bloc[0] = 0xFFFF; // 65535
 
-    b.k = 1;
-    b.signe = 1;
+    /********** Test 1 : 65535 + 1 **********/
+    a.k = 1; a.signe = 1;
+    a.bloc = malloc(sizeof(unsigned short));
+    a.bloc[0] = 0xFFFF;
+
+    b.k = 1; b.signe = 1;
     b.bloc = malloc(sizeof(unsigned short));
     b.bloc[0] = 0x0001;
 
@@ -244,90 +243,106 @@ void test_unit()
     assert(c.bloc[1] == 0x0001);
     assert(c.k == 2);
     assert(c.signe == 1);
+
     printf("addition : OK\n");
+
     free(a.bloc);
     free(b.bloc);
     free(c.bloc);
 
-    // Exemple2 : +645 + -2002
-    bigbig ax, by;
 
-    ax = create_bigbig(1, 16); // signe 1 (posi)
-    ax.bloc[0] = 0x0285;       // 645
+    /********** Test 2 : +645 + (-2002) **********/
+    bigbig ax = create_bigbig(1, 16);
+    ax.bloc[0] = 0x0285; // 645
 
-    by = create_bigbig(0, 16); // signe 0 (nega)
-    by.bloc[0] = 0x07D2;       // 2002
+    bigbig by = create_bigbig(0, 16);
+    by.bloc[0] = 0x07D2; // 2002
 
     add_soustration_bigbig(ax, by, &c);
+
     assert(c.bloc[0] == 0x054D);
     assert(c.k == 1);
     assert(c.signe == 0);
+
     printf("soustraction normal : OK\n");
+
     free(ax.bloc);
     free(by.bloc);
     free(c.bloc);
-    // Exemple2 : +0 + -2002
-    bigbig a0;
 
-    a0 = create_bigbig(1, 16); // signe 1 (posi)
+
+    /********** Test 3 : 0 + (-2002) **********/
+    bigbig a0 = create_bigbig(1, 16);
     a0.bloc[0] = 0x0000;
 
-    by = create_bigbig(0, 16); // signe 0 (nega)
-    by.bloc[0] = 0x07D2;       // 2002
+    by = create_bigbig(0, 16);
+    by.bloc[0] = 0x07D2;
 
     add_soustration_bigbig(a0, by, &c);
+
     assert(c.bloc[0] == 0x07D2);
     assert(c.k == 1);
     assert(c.signe == 0);
-    printf("soustraction avec 0 : OK \n");
+
+    printf("soustraction avec 0 : OK\n");
+
     free(a0.bloc);
     free(by.bloc);
     free(c.bloc);
-    // Exemple2 : +0 + -2002
 
-    by = create_bigbig(0, 16); // signe 0 (nega)
-    by.bloc[0] = 0x07D2;       // 2002
-    bigbig z = create_bigbig(0, 16); // signe 0 (nega)
-    z.bloc[0] = 0x0000;       // 0
 
+    /********** Test 4 : (-2002) + 0 **********/
+    by = create_bigbig(0, 16);
+    by.bloc[0] = 0x07D2;
+
+    bigbig z = create_bigbig(0, 16);
+    z.bloc[0] = 0x0000;
 
     add_soustration_bigbig(by, z, &c);
+
     assert(c.bloc[0] == 0x07D2);
     assert(c.k == 1);
     assert(c.signe == 0);
-    printf("soustraction qui donne 0 : OK \n");
+
+    printf("soustraction qui donne 0 : OK\n");
+
     free(by.bloc);
     free(z.bloc);
     free(c.bloc);
 
-    // Exemple2 : +2002 * 2002
 
-    // Cas : 2002 * 0
+    /********** Test 5 : 2002 * 2002 **********/
     bigbig axx = create_bigbig(1, 16);
     axx.bloc[0] = 0x07D2;
 
-    bigbig bxx = create_bigbig(1, 16); //
+    bigbig bxx = create_bigbig(1, 16);
     bxx.bloc[0] = 0x07D2;
 
     multiplication(axx, bxx, &c);
 
-    // Vérifications
-    assert(c.bloc[0] == 0x2844); // Le résultat doit être 0
+    assert(c.bloc[0] == 0x2844);
     assert(c.bloc[1] == 0x003D);
-    assert(c.k == 2); // Taille 1
+    assert(c.k == 2);
 
-    printf("Multiplication 2002*2002 : OK \n");
+    printf("Multiplication 2002*2002 : OK\n");
+
     free(axx.bloc);
     free(bxx.bloc);
     free(c.bloc);
 
-    bigbig aauc;
-    aauc = create_bigbig(1, 16);
-    aauc.bloc[0] = 0x0011;
+
+    /********** Test 6 : carré **********/
+    bigbig aauc = create_bigbig(1, 16);
+    aauc.bloc[0] = 0xaa32;
+
     multiplication(aauc, aauc, &aauc);
-    assert(aauc.bloc[0] == 0x0121);
-    assert(aauc.k == 1);
-    printf("Multiplication au carre : OK \n");
+
+    assert(aauc.bloc[1] == 0x7126);
+    assert(aauc.bloc[0] == 0x71C4);
+    assert(aauc.k == 2);
+
+    printf("Multiplication au carré : OK\n");
+
     free(aauc.bloc);
 }
 
