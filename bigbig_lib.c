@@ -113,6 +113,7 @@ bigbig soustraction_bigbig(bigbig a,bigbig b,bigbig *c){
 
 
     }
+    nettoyer_zero(c);
 return *c;
 }
 
@@ -121,16 +122,19 @@ bigbig add_soustration_bigbig(bigbig a,bigbig b,bigbig *c){
     if(mme_signature == 1){
          addtion_bigbig( a, b, c);
          c->signe = a.signe; // le signe des deux
+         nettoyer_zero(c);
          return *c;
     }
     int test = valeur_absolue( a,  b);
     if (test == 1){
         soustraction_bigbig(a, b, c);
         c->signe = a.signe;
+        nettoyer_zero(c);
         return *c;
     }else{
         soustraction_bigbig(b, a, c);
         c->signe = b.signe;
+        nettoyer_zero(c);
         return *c;
     }
 
@@ -139,9 +143,9 @@ bigbig add_soustration_bigbig(bigbig a,bigbig b,bigbig *c){
 void redimentionner(bigbig *D,int S_taille){
     if (D->k == S_taille)return;
     unsigned short *temp = realloc(D->bloc,S_taille * sizeof(unsigned short));
-    assert(*temp != NULL);
+    assert(temp != NULL);
     if (D->k < S_taille){
-        for(int i=D->k; i>S_taille;i++){
+        for(int i=D->k; i<S_taille;i++){
             D->bloc[i]=0;
         }
     }
@@ -159,7 +163,7 @@ void copier(bigbig *D,bigbig *S){
 }
 
 
-//on attarque la qst4 : la multiplication
+//on attaque la qst4 : la multiplication
 bigbig multiplication(bigbig a,bigbig b,bigbig *c){
     c->k = a.k+b.k; 
     c->bloc = calloc(c->k,sizeof(unsigned short));
@@ -278,8 +282,8 @@ void test_unit(){
     aauc = create_bigbig(1,16);
     aauc.bloc[0]=0x0011;
     multiplication(aauc, aauc, &aauc);
-    assert(cxx.bloc[0] == 0x0121);
-    assert(cxx.k == 1);
+    assert(aauc.bloc[0] == 0x0121);
+    assert(aauc.k == 1);
     printf("Multiplication au carre : OK \n");
     
 }
