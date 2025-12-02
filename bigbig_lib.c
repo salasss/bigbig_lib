@@ -9,7 +9,7 @@ typedef struct
     unsigned short *bloc; // tableau qui stock les val
 
 } bigbig;
-
+int BASE = 65536;
 void afficher_bigbig(bigbig num);
 
 // qst2) fonc qui cree un nombre sur p bits et init a 0 avec p multiple de 16
@@ -39,16 +39,17 @@ int meme_signature(int a, int b)
 
 void nettoyer_zero(bigbig *c)
 {
-    //1er version :
+    // 1er version :
     while (c->k > 1 && c->bloc[c->k - 1] == 0)
     {
         c->k--;
     };
-    //2nd version pour bien fiare les chose faut reallouer ce qu'on a besoin sans prendre des cases e nplus pour rien
-    unsigned short *tmp = realloc(c->bloc,c->k * sizeof(unsigned short));
-    if (tmp != NULL) {
+    // 2nd version pour bien fiare les chose faut reallouer ce qu'on a besoin sans prendre des cases e nplus pour rien
+    unsigned short *tmp = realloc(c->bloc, c->k * sizeof(unsigned short));
+    if (tmp != NULL)
+    {
         c->bloc = tmp;
-    } 
+    }
 }
 // qst3) une fonction qui effecture l'addition de 2 nombre de cette representation et qui le dans dans un 3 eme parametre
 bigbig addtion_bigbig(bigbig a, bigbig b, bigbig *c)
@@ -185,6 +186,15 @@ void copier(bigbig *D, bigbig *S)
         D->bloc[i] = S->bloc[i];
     }
 }
+void detruire(bigbig *a)
+{
+    if (a != NULL && a->bloc != NULL)
+    {
+        free(a->bloc);
+        a->bloc = NULL;
+        a->k = 0;
+    }
+}
 
 // on attaque la qst4 : la multiplication
 bigbig multiplication(bigbig a, bigbig b, bigbig *c)
@@ -224,16 +234,88 @@ bigbig multiplication(bigbig a, bigbig b, bigbig *c)
     return *c;
 }
 
+void div_par_10(bigbig *a, unsigned short *r)
+{
+    unsigned int carry = 0;
+
+    for (int i = a->k - 1; i >= 0; i--)
+    {
+        unsigned int curr = carry * 65536 + (unsigned int)a->bloc[i];
+
+        a->bloc[i] = (unsigned short)(curr / 10);
+        carry = curr % 10;
+    }
+
+    if (r != NULL)
+        *r = (unsigned short)carry;
+    nettoyer_zero(a);
+}
+int est_nul(bigbig *a)
+{
+    for (int i = 0; i < a->k; i++)
+    {
+        if (a->bloc[i] != 0)
+            return 0;
+    }
+    return 1;
+}
+
+void rec_afficher(bigbig *a)
+{
+    if (est_nul(a))
+    {
+        return;
+    }
+
+    unsigned short reste = 0;
+    div_par_10(a, &reste); // a devient a/10, reste contient le dernier chiffre
+
+    rec_afficher(a); // Appel récursif
+
+    printf("%d", reste); // Affiche le chiffre au retour de la récursion
+}
+void afficher(const char *S, bigbig *a)
+{
+    printf("%s", S);
+
+    // Cas particulier : Zéro
+    if (est_nul(a))
+    {
+        printf("0\n");
+        return;
+    }
+
+    // Gestion du signe (si 0 = négatif, et que le nombre n'est pas nul)
+    if (a->signe == 0)
+    {
+        printf("-");
+    }
+
+    // 1. Création d'une copie temporaire pour ne pas détruire 'a' avec les divisions
+    bigbig temp = create_bigbig(a->signe, a->k * 16);
+    copier(&temp, a);
+
+    // 2. Appel de la récursion sur la copie
+    rec_afficher(&temp);
+
+    printf("\n");
+
+    // 3. Libération de la mémoire de la copie
+    free(temp.bloc);
+}
+
 void test_unit()
 {
     bigbig a, b, c;
 
     /********** Test 1 : 65535 + 1 **********/
-    a.k = 1; a.signe = 1;
+    a.k = 1;
+    a.signe = 1;
     a.bloc = malloc(sizeof(unsigned short));
     a.bloc[0] = 0xFFFF;
 
-    b.k = 1; b.signe = 1;
+    b.k = 1;
+    b.signe = 1;
     b.bloc = malloc(sizeof(unsigned short));
     b.bloc[0] = 0x0001;
 
@@ -249,7 +331,6 @@ void test_unit()
     free(a.bloc);
     free(b.bloc);
     free(c.bloc);
-
 
     /********** Test 2 : +645 + (-2002) **********/
     bigbig ax = create_bigbig(1, 16);
@@ -270,7 +351,6 @@ void test_unit()
     free(by.bloc);
     free(c.bloc);
 
-
     /********** Test 3 : 0 + (-2002) **********/
     bigbig a0 = create_bigbig(1, 16);
     a0.bloc[0] = 0x0000;
@@ -289,7 +369,6 @@ void test_unit()
     free(a0.bloc);
     free(by.bloc);
     free(c.bloc);
-
 
     /********** Test 4 : (-2002) + 0 **********/
     by = create_bigbig(0, 16);
@@ -310,7 +389,6 @@ void test_unit()
     free(z.bloc);
     free(c.bloc);
 
-
     /********** Test 5 : 2002 * 2002 **********/
     bigbig axx = create_bigbig(1, 16);
     axx.bloc[0] = 0x07D2;
@@ -330,7 +408,6 @@ void test_unit()
     free(bxx.bloc);
     free(c.bloc);
 
-
     /********** Test 6 : carré **********/
     bigbig aauc = create_bigbig(1, 16);
     aauc.bloc[0] = 0xaa32;
@@ -349,7 +426,11 @@ void test_unit()
 int main()
 {
     test_unit();
-
+    bigbig mon_num = create_bigbig(1, 16);
+    mon_num.bloc[0] = 0x6357;
+    afficher_bigbig(mon_num);
+    afficher("Mon nombre en base 10 : ", &mon_num);
+    detruire(&mon_num);
     return 0;
 }
 void afficher_bigbig(bigbig num)
